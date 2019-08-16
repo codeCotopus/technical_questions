@@ -1,0 +1,123 @@
+------------------------------------------------------------------------------------------------------
+https://leetcode.com/explore/interview/card/top-interview-questions-easy/96/sorting-and-searching/774/
+------------------------------------------------------------------------------------------------------
+You are a product manager and currently leading a team to develop a new product. Unfortunately, the latest version of your product fails 
+the quality check. Since each version is developed based on the previous version, all the versions after a bad version are also bad.
+
+Suppose you have n versions [1, 2, ..., n] and you want to find out the first bad one, which causes all the following ones to be bad.
+
+You are given an API bool isBadVersion(version) which will return whether version is bad. Implement a function to find the first bad 
+version. You should minimize the number of calls to the API.
+
+Example:
+
+Given n = 5, and version = 4 is the first bad version.
+
+call isBadVersion(3) -> false
+call isBadVersion(5) -> true
+call isBadVersion(4) -> true
+
+Then 4 is the first bad version. 
+------------------------------------------------------------------------------------------------------
+
+This problem presents an interesting twist in terms of searching problems. It is not enough to look at an element, but it is also 
+required to look at the previous element. 
+
+Let's first recap our options:
+Independently of the data structure, which might or might not provide us with specific ways of searching, in general terms we can 
+clasify search algorithms into two different cathegories. Linear and Binary.  Linear algorithms complexity is O(n) worst case scenario 
+while Binary algorithms have a complexity of O(Log(n)) . Space complexity is constant O(1) for both. Given the fact that the problem 
+does not state the contraints of the input, Binary search will be preferred. 
+
+How do we perform Binary search? Well , the concept is easy to grasp, and not hard to code once we understand what to do. Let's forget 
+for one second about this particular problem and focus on a simple search of an element in a sorted array. 
+Let's assume then that our element is somewhere between position 0 and 10 of the aray. Since we agreed that the array is already sorted, 
+we know we can compare any element against the element we are looking for.
+
+At the begining of the problem we have yet to look at any element on the array. As an implication of this , the probability of a 
+position containing the element we are looking for is the same for every position. 
+
+The whole point of Binary search, is to be able to reduce our popularion in half every time we look at an element, so that, in worst
+case scenario, we don't need to look at every element in the array. Taking this into account, and the fact that any position might 
+contain our element, we will start at the middle of the array. 
+
+Identifying the middle. 
+In order to identify the middle, we will take into account the maximum and minimum values that our position can take and then perform an
+integer division of the difference : middle = maximum - minimum // 2 .
+
+we can then look at the element in the middle position. If the element is the one we are looking for, we are done. We can return our 
+middle value. If the lement is not the element we are looking for, there are 2 posisbilities: The element is bigger or smaller than the
+one we are looking for. 
+
+If the element is bigger than the one we are looking for, our has to be to the "left" of our array. IF the element is smaller, it has 
+to be to its right. We can now either decrease the maximum possible position for our element, or increase the minimum. One way or another
+we are changing he boundaries of our search space and are now in a position to calculate a new middle:
+
+  If the element we see is bigger: We know our maximum value is now what we saw as middle (in fairness , is middle - 1  ). After adjusting
+    the maximum value, we recalculate the new middle:
+      maximum = midle
+      middle =  middle -(maximum - minimum) //2  
+  If the element is smaller we do the oposite:
+       minimum = middle
+       middle += (maximum - minimum) //2      
+
+In a general search problem, the element might not exist, so, how do we know this? 
+Well, based on how the algorithms is implemented minumum will be bigger than maximum or they will be equal and the position they
+point to won't contain the element we are looking for. 
+
+In our case we do know the element is present. 
+
+There is another optimization possible. If the first version is already defective, we can return 1 immediately.  
+
+How do we know we found our element in this problem?  We've found our element when the following condition is true :
+ isBadVersion(middle) and not isBadVersion(middle-1)
+ 
+So, how does the solution look like? 
+
+class Solution:
+    def firstBadVersion(self, n):
+        """
+        :type n: int
+        :rtype: int
+        """
+        if isBadVersion(1):
+            return 1
+        
+        maximum = n
+        minimum =1
+        middle = maximum - minimum //2
+        
+        while not (isBadVersion(middle) and not isBadVersion(middle-1)):                    
+            if not isBadVersion(middle):                
+                minimum = middle
+                middle += (maximum - minimum) //2                
+            else :
+                maximum = middle
+                middle -= (maximum - minimum) //2      
+        
+        
+            
+        return middle
+        
+        
+Just for documentation purpose, a more generic approach would look like this: 
+x will be our element and it might be contain on a sorted array called arr, If we finish the loop and the element is not found,
+we return -1
+
+  while minimum <= maximum: 
+  
+        middle = minimum + (maximum - minimum)//2;          
+        
+        if arr[middle] == x:  
+            return middle   
+        
+        elif arr[middle] < x: 
+            minimum = middle + 1
+  
+        
+        else: 
+           maximum = middle - 1   
+    
+    return -1
+  
+ 
